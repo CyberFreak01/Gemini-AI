@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-  const String API_KEY = "AIzaSyDYHXDNDpE-1E5Cxc4e4MtnkWGorfkruWY";
+const String API_KEY = "AIzaSyDYHXDNDpE-1E5Cxc4e4MtnkWGorfkruWY";
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -68,28 +68,44 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() => questionAnswers
         .add(QuestionAnswer(question: question, answer: StringBuffer())));
+    debugPrint("here1");
+    // List<Content> _messagesHistory =
+    //     questionAnswers.reversed.map((questionAnswers) {
+    //   if (questionAnswers.question.isNotEmpty) {
+    //     return Content(
+    //         parts: [Parts(text: questionAnswers.question)],
+    //         role: 'user');
+    //   } else {
+    //     return Content(
+    //         parts: [Parts(text: questionAnswers.answer.toString())],
+    //         role: 'model');
+    //   }
+    // }).toList();
 
-    List<Content> _messagesHistory =
-        questionAnswers.reversed.map((questionAnswers) {
-      if (questionAnswers.question.isNotEmpty) {
-        return Content(
-            parts: [Parts(text: questionAnswers.question)], role: 'user');
-      } else {
-        return Content(
-            parts: [Parts(text: questionAnswers.answer.toString())],
-            role: 'model');
-      }
-    }).toList();
+    List<Content> _messageHistory = [];
 
+    for (var qa in questionAnswers) {
+      _messageHistory
+          .add(Content(parts: [Parts(text: qa.question)], role: 'user'));
+
+      if(qa.answer.isNotEmpty)
+      {
+        _messageHistory.add(
+          Content(parts: [Parts(text: qa.answer.toString())], role: 'model'));
+          }
+    }
+    debugPrint(_messageHistory.toString());
     gemini
-        .chat(_messagesHistory)
+        .chat(_messageHistory)
         .then((value) => {
               if (value!.output!.isNotEmpty)
                 {
+                  debugPrint("here3"),
                   setState(() {
-                questionAnswers.last.answer.write(value.output);
-                _scrollToBottom();
+                    questionAnswers.last.answer.write(value.output);
+                    _scrollToBottom();
                     isLoading = false;
+                    loadingNotifier.value = false;
                   })
                 }
             })
@@ -104,10 +120,8 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 1,
         shadowColor: Colors.white12,
         centerTitle: true,
-        title: const Text(
-          "Gemini AI",
-          style: TextStyle(fontWeight: kSemiBold,color: Colors.blue)
-        ),
+        title: const Text("Gemini AI",
+            style: TextStyle(fontWeight: kSemiBold, color: Color.fromARGB(255, 145, 200, 245))),
         backgroundColor: kBg300Color,
       ),
       body: SafeArea(
@@ -173,6 +187,25 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     });
   }
+}
 
+class TextColorChanger extends StatelessWidget {
+  final Color textColor;
+  final Widget child;
+
+  const TextColorChanger({
+    Key? key,
+    required this.textColor,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle.merge(
+      style: TextStyle(
+          color: textColor), // Set default text color for the widget subtree
+      child: child,
+    );
+  }
 }
 

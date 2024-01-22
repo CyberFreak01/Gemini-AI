@@ -1,5 +1,6 @@
 import 'package:chatgpt/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatGptAnswerWidget extends StatelessWidget {
   final String answer;
@@ -8,6 +9,13 @@ class ChatGptAnswerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     MarkdownStyleSheet customStyleSheet =
+          MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+        textScaleFactor: 1.2, // Adjust text scale as needed
+        p: const TextStyle(color: Colors.white), // Default color for paragraphs
+        strong: const TextStyle(color: Colors.black), // Style for bold text
+        em: const TextStyle(color: Colors.white),
+           ); // Style for italic text
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,16 +31,38 @@ class ChatGptAnswerWidget extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
-              color: kBg100Color,
+              color: Colors.lightBlue,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              answer.toString().trim(),
-              style: kWhiteText.copyWith(fontSize: 16, fontWeight: kRegular),
-            ),
+            child: Markdown(
+           physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          data:answer.toString().trim(),
+          selectable: true,
+          styleSheet: customStyleSheet,
+        )
           ),
         ),
       ],
+    );
+  }
+}
+class TextColorChanger extends StatelessWidget {
+  final Color textColor;
+  final Widget child;
+
+  const TextColorChanger({
+    Key? key,
+    required this.textColor,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle.merge(
+      style: TextStyle(
+          color: textColor), // Set default text color for the widget subtree
+      child: child,
     );
   }
 }
